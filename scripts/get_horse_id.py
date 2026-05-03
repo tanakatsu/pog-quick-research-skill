@@ -10,7 +10,7 @@ from netkeiba.horse import search_horse
 async def main(args: argparse.Namespace) -> int:
     async with browser_context() as ctx:
         try:
-            result = await search_horse(ctx, name=args.name, mare=args.mare)
+            result = await search_horse(ctx, name=args.name, mare=args.mare, age=args.age)
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)
             return 1
@@ -29,11 +29,17 @@ async def main(args: argparse.Namespace) -> int:
 
 def cli() -> None:
     parser = argparse.ArgumentParser(
-        description="netkeiba から 2歳馬の馬IDを取得する"
+        description="netkeiba から馬IDを取得する"
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--name", help="馬名（完全一致）")
     group.add_argument("--mare", help="母馬名")
+    parser.add_argument(
+        "--age",
+        type=int,
+        default=None,
+        help="年齢（省略時: 2歳〜指定なし）",
+    )
     args = parser.parse_args()
     sys.exit(asyncio.run(main(args)))
 
