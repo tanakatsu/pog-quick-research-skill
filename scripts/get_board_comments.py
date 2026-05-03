@@ -23,7 +23,7 @@ def cli() -> None:
         description="netkeiba 掲示板コメントを全ページ取得して保存する"
     )
     parser.add_argument("horse_id", help="馬ID")
-    parser.add_argument("-o", "--output-dir", required=True, help="出力ディレクトリ")
+    parser.add_argument("-o", "--output-dir", default="cache", help="出力ディレクトリ (デフォルト: cache)")
     args = parser.parse_args()
     sys.exit(asyncio.run(main(args)))
 
