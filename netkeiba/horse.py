@@ -34,8 +34,12 @@ async def search_horse(
     *,
     name: str | None = None,
     mare: str | None = None,
+    age: int | None = None,
 ) -> dict | list[dict]:
-    """馬名または母馬名で 2歳馬を検索し、馬ID情報を返す。
+    """馬名または母馬名で馬を検索し、馬ID情報を返す。
+
+    age を指定するとその年齢 from/to をフォームにセットする。
+    age を省略するとフォームの初期値（from=2歳, to=指定なし）のまま検索する。
 
     Returns:
         単一ヒット (直接リダイレクト) → dict
@@ -47,9 +51,10 @@ async def search_horse(
     try:
         await _load_page(page, _SEARCH_URL)
 
-        # 年齢 to = 2歳（from は既定値 2歳）
-        age_row = page.get_by_role("row", name=re.compile("年齢"))
-        await age_row.get_by_role("combobox").nth(1).select_option("2歳")
+        if age is not None:
+            age_row = page.get_by_role("row", name=re.compile("年齢"))
+            await age_row.get_by_role("combobox").nth(0).select_option(f"{age}歳")
+            await age_row.get_by_role("combobox").nth(1).select_option(f"{age}歳")
 
         if name is not None:
             name_row = page.get_by_role("row", name=re.compile("馬名"))
