@@ -56,7 +56,7 @@ async def fetch_all_board_comments(
 
     all_comments = list(page1_comments)
     for page_num, result in zip(range(2, total_pages + 1), results):
-        if isinstance(result, Exception):
+        if isinstance(result, BaseException):
             print(
                 f"[warn] page {page_num} の取得失敗（スキップ）: {result}",
                 file=sys.stderr,
