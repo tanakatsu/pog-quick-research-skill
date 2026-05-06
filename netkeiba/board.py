@@ -11,13 +11,9 @@ from netkeiba.retry import with_retry
 async def fetch_all_board_comments(
     context: BrowserContext,
     horse_id: str,
-    output_dir: Path,
     concurrency: int = 5,
-) -> None:
-    """掲示板コメントを全ページ取得し {output_dir}/{horse_id}_{page}.txt に保存する。"""
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    # ページ1: 総ページ数の取得とコメント保存
+) -> list[dict]:
+    """掲示板コメントを全ページ取得してパース済みコメント一覧を返す。"""
     page = await context.new_page()
     try:
         await page.goto(
@@ -36,34 +32,39 @@ async def fetch_all_board_comments(
         total_pages = max(page_nums) if page_nums else 1
 
         text = await page.locator("#Comment_List").inner_text()
-        (output_dir / f"{horse_id}_1.txt").write_text(text, encoding="utf-8")
+        page1_comments = _parse_comment_page(text)
+        print(f"ページ 1/{total_pages} 完了")
     finally:
         await page.close()
 
     if total_pages <= 1:
-        return
+        return page1_comments
 
-    # ページ 2..N を Semaphore(concurrency) 下で並列取得
     sem = asyncio.Semaphore(concurrency)
 
-    async def fetch_and_save(page_num: int) -> None:
+    async def fetch_page(page_num: int) -> list[dict]:
         async with sem:
             text = await _fetch_comment_page(context, horse_id, page_num)
-            (output_dir / f"{horse_id}_{page_num}.txt").write_text(
-                text, encoding="utf-8"
-            )
+            comments = _parse_comment_page(text)
+            print(f"ページ {page_num}/{total_pages} 完了")
+            return comments
 
     results = await asyncio.gather(
-        *[fetch_and_save(n) for n in range(2, total_pages + 1)],
+        *[fetch_page(n) for n in range(2, total_pages + 1)],
         return_exceptions=True,
     )
 
+    all_comments = list(page1_comments)
     for page_num, result in zip(range(2, total_pages + 1), results):
         if isinstance(result, Exception):
             print(
                 f"[warn] page {page_num} の取得失敗（スキップ）: {result}",
                 file=sys.stderr,
             )
+        else:
+            all_comments.extend(result)
+
+    return all_comments
 
 
 _COMMENT_RE = re.compile(
