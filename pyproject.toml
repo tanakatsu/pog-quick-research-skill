@@ -12,3 +12,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["netkeiba"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+]
