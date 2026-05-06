@@ -66,6 +66,17 @@ async def fetch_all_board_comments(
             )
 
 
+def _parse_comment_page(text: str) -> list[dict]:
+    pattern = re.compile(
+        r"\[(\d+)\][^\n]+\n\n(.*?)\n\n(\d{4}/\d+/\d+ \d+:\d+)",
+        re.DOTALL,
+    )
+    return [
+        {"no": int(m.group(1)), "date": m.group(3), "text": m.group(2).strip()}
+        for m in pattern.finditer(text)
+    ]
+
+
 @with_retry(max_attempts=3, base_delay=1.0)
 async def _fetch_comment_page(
     context: BrowserContext, horse_id: str, page_num: int
