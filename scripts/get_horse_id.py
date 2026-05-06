@@ -23,6 +23,14 @@ def load_cache(path: str) -> list[dict]:
         return []
 
 
+def save_cache(path: str, entries: list[dict]) -> None:
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(entries, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Warning: キャッシュ書き込み失敗 ({e})", file=sys.stderr)
+
+
 async def main(args: argparse.Namespace) -> int:
     async with browser_context() as ctx:
         try:

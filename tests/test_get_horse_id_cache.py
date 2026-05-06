@@ -40,3 +40,28 @@ def test_load_cache_non_list_json(tmp_path, capsys):
     assert result == []
     captured = capsys.readouterr()
     assert "Warning" in captured.err
+
+
+from unittest.mock import patch
+from get_horse_id import save_cache
+
+
+def test_save_cache_writes_file(tmp_path):
+    data = [{"name": "テスト馬", "mare": "テスト母", "horse_id": "2023001001"}]
+    cache_file = tmp_path / "horse_list.json"
+
+    save_cache(str(cache_file), data)
+
+    written = json.loads(cache_file.read_text(encoding="utf-8"))
+    assert written == data
+
+
+def test_save_cache_write_failure_warns(tmp_path, capsys):
+    data = [{"name": "テスト馬", "mare": "テスト母", "horse_id": "2023001001"}]
+    cache_file = tmp_path / "horse_list.json"
+
+    with patch("builtins.open", side_effect=IOError("disk full")):
+        save_cache(str(cache_file), data)
+
+    captured = capsys.readouterr()
+    assert "Warning" in captured.err
