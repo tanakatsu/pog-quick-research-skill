@@ -16,4 +16,5 @@ packages = ["netkeiba"]
 [tool.uv]
 dev-dependencies = [
     "pytest>=8.0.0",
+    "ruff>=0.15.12",
 ]
