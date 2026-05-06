@@ -68,6 +68,13 @@ def add_to_cache(entries: list[dict], result: dict | list[dict]) -> list[dict]:
 
 
 async def main(args: argparse.Namespace) -> int:
+    entries = load_cache(args.cache)
+
+    cached = search_cache(entries, name=args.name, mare=args.mare, age=args.age)
+    if cached is not None:
+        print(json.dumps(cached, ensure_ascii=False))
+        return 0
+
     async with browser_context() as ctx:
         try:
             result = await search_horse(ctx, name=args.name, mare=args.mare, age=args.age)
@@ -77,7 +84,10 @@ async def main(args: argparse.Namespace) -> int:
 
     print(json.dumps(result, ensure_ascii=False))
 
-    # 想定外エラーは exit 1、「該当なし」は正常扱いで exit 0
+    if not (isinstance(result, dict) and "error" in result):
+        updated = add_to_cache(entries, result)
+        save_cache(args.cache, updated)
+
     if (
         isinstance(result, dict)
         and "error" in result
@@ -99,6 +109,11 @@ def cli() -> None:
         type=int,
         default=None,
         help="年齢（省略時: 2歳〜指定なし）",
+    )
+    parser.add_argument(
+        "--cache",
+        default="cache/horse_list.json",
+        help="キャッシュファイルのパス（デフォルト: cache/horse_list.json）",
     )
     args = parser.parse_args()
     sys.exit(asyncio.run(main(args)))
