@@ -11,7 +11,11 @@ from netkeiba.horse import search_horse
 def load_cache(path: str) -> list[dict]:
     try:
         with open(path, encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+        if not isinstance(data, list):
+            print(f"Warning: キャッシュ形式エラー（配列が必要）", file=sys.stderr)
+            return []
+        return data
     except FileNotFoundError:
         return []
     except Exception as e:

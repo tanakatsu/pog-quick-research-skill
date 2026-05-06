@@ -30,3 +30,13 @@ def test_load_cache_corrupted_file(tmp_path, capsys):
     assert result == []
     captured = capsys.readouterr()
     assert "Warning" in captured.err
+
+
+def test_load_cache_non_list_json(tmp_path, capsys):
+    cache_file = tmp_path / "horse_list.json"
+    cache_file.write_text('{"name": "テスト馬"}', encoding="utf-8")
+
+    result = load_cache(str(cache_file))
+    assert result == []
+    captured = capsys.readouterr()
+    assert "Warning" in captured.err
