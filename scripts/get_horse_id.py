@@ -1,10 +1,22 @@
 import argparse
 import asyncio
+import datetime
 import json
 import sys
 
 from netkeiba.browser import browser_context
 from netkeiba.horse import search_horse
+
+
+def load_cache(path: str) -> list[dict]:
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+    except Exception as e:
+        print(f"Warning: キャッシュ読み込み失敗 ({e})", file=sys.stderr)
+        return []
 
 
 async def main(args: argparse.Namespace) -> int:
