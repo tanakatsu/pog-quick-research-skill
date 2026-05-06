@@ -66,14 +66,16 @@ async def fetch_all_board_comments(
             )
 
 
+_COMMENT_RE = re.compile(
+    r"\[(\d+)\][^\n]+\n\n(.*?)\n\n(\d{4}/\d+/\d+ \d+:\d+)",
+    re.DOTALL,
+)
+
+
 def _parse_comment_page(text: str) -> list[dict]:
-    pattern = re.compile(
-        r"\[(\d+)\][^\n]+\n\n(.*?)\n\n(\d{4}/\d+/\d+ \d+:\d+)",
-        re.DOTALL,
-    )
     return [
         {"no": int(m.group(1)), "date": m.group(3), "text": m.group(2).strip()}
-        for m in pattern.finditer(text)
+        for m in _COMMENT_RE.finditer(text)
     ]
 
 
