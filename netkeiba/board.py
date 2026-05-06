@@ -1,7 +1,6 @@
 import asyncio
 import re
 import sys
-from pathlib import Path
 
 from playwright.async_api import BrowserContext
 
