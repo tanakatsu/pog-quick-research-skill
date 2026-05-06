@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import datetime
 import json
+import os
 import sys
 
 from netkeiba.browser import browser_context
@@ -13,7 +14,7 @@ def load_cache(path: str) -> list[dict]:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
         if not isinstance(data, list):
-            print(f"Warning: キャッシュ形式エラー（配列が必要）", file=sys.stderr)
+            print("Warning: キャッシュ形式エラー（配列が必要）", file=sys.stderr)
             return []
         return data
     except FileNotFoundError:
@@ -25,6 +26,9 @@ def load_cache(path: str) -> list[dict]:
 
 def save_cache(path: str, entries: list[dict]) -> None:
     try:
+        dir_name = os.path.dirname(path)
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(entries, f, ensure_ascii=False, indent=2)
     except Exception as e:
