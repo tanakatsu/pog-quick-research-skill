@@ -54,6 +54,19 @@ def search_cache(
     return hits
 
 
+def add_to_cache(entries: list[dict], result: dict | list[dict]) -> list[dict]:
+    if isinstance(result, dict):
+        if "error" in result:
+            return entries
+        new_entries = [result]
+    else:
+        new_entries = result
+
+    existing_ids = {e["horse_id"] for e in entries}
+    added = [e for e in new_entries if e.get("horse_id") not in existing_ids]
+    return entries + added
+
+
 async def main(args: argparse.Namespace) -> int:
     async with browser_context() as ctx:
         try:

@@ -125,3 +125,46 @@ def test_search_cache_age_filter_no_match():
 def test_search_cache_empty_entries():
     result = search_cache([], name="アオイアサヒ", mare=None, age=None)
     assert result is None
+
+
+from get_horse_id import add_to_cache
+
+
+def test_add_to_cache_single_dict():
+    entries = []
+    result = add_to_cache(entries, {"name": "テスト馬", "mare": "テスト母", "horse_id": "2023001001"})
+    assert len(result) == 1
+    assert result[0]["horse_id"] == "2023001001"
+
+
+def test_add_to_cache_list():
+    entries = []
+    new_entries = [
+        {"name": "馬A", "mare": "母X", "horse_id": "2023001001"},
+        {"name": "馬B", "mare": "母X", "horse_id": "2023001002"},
+    ]
+    result = add_to_cache(entries, new_entries)
+    assert len(result) == 2
+
+
+def test_add_to_cache_skips_duplicate_horse_id():
+    entries = [{"name": "テスト馬", "mare": "テスト母", "horse_id": "2023001001"}]
+    result = add_to_cache(entries, {"name": "テスト馬", "mare": "テスト母", "horse_id": "2023001001"})
+    assert len(result) == 1
+
+
+def test_add_to_cache_skips_error_dict():
+    entries = []
+    result = add_to_cache(entries, {"error": "該当データが存在しません"})
+    assert result == []
+
+
+def test_add_to_cache_partial_duplicates():
+    entries = [{"name": "馬A", "mare": "母X", "horse_id": "2023001001"}]
+    new_entries = [
+        {"name": "馬A", "mare": "母X", "horse_id": "2023001001"},  # duplicate
+        {"name": "馬B", "mare": "母X", "horse_id": "2023001002"},  # new
+    ]
+    result = add_to_cache(entries, new_entries)
+    assert len(result) == 2
+    assert result[1]["horse_id"] == "2023001002"
