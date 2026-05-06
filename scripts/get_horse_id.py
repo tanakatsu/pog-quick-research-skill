@@ -31,6 +31,29 @@ def save_cache(path: str, entries: list[dict]) -> None:
         print(f"Warning: キャッシュ書き込み失敗 ({e})", file=sys.stderr)
 
 
+def search_cache(
+    entries: list[dict],
+    *,
+    name: str | None,
+    mare: str | None,
+    age: int | None,
+) -> dict | list[dict] | None:
+    if name is not None:
+        hits = [e for e in entries if e.get("name") == name]
+    else:
+        hits = [e for e in entries if e.get("mare") == mare]
+
+    if age is not None:
+        birth_year = str(datetime.date.today().year - age)
+        hits = [e for e in hits if e.get("horse_id", "").startswith(birth_year)]
+
+    if not hits:
+        return None
+    if len(hits) == 1:
+        return hits[0]
+    return hits
+
+
 async def main(args: argparse.Namespace) -> int:
     async with browser_context() as ctx:
         try:

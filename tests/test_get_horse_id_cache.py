@@ -65,3 +65,63 @@ def test_save_cache_write_failure_warns(tmp_path, capsys):
 
     captured = capsys.readouterr()
     assert "Warning" in captured.err
+
+
+from get_horse_id import search_cache
+
+SAMPLE_ENTRIES = [
+    {"name": "アオイアサヒ", "mare": "サクラマム", "horse_id": "2023001001"},
+    {"name": "ハナビスター", "mare": "サクラマム", "horse_id": "2023001002"},
+    {"name": "キタノタカラ", "mare": "ユキノマム", "horse_id": "2024001003"},
+]
+
+
+def test_search_cache_by_name_found():
+    result = search_cache(SAMPLE_ENTRIES, name="アオイアサヒ", mare=None, age=None)
+    assert result == {"name": "アオイアサヒ", "mare": "サクラマム", "horse_id": "2023001001"}
+
+
+def test_search_cache_by_name_not_found():
+    result = search_cache(SAMPLE_ENTRIES, name="存在しない馬", mare=None, age=None)
+    assert result is None
+
+
+def test_search_cache_by_mare_multiple():
+    result = search_cache(SAMPLE_ENTRIES, name=None, mare="サクラマム", age=None)
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert result[0]["horse_id"] == "2023001001"
+    assert result[1]["horse_id"] == "2023001002"
+
+
+def test_search_cache_by_mare_single():
+    result = search_cache(SAMPLE_ENTRIES, name=None, mare="ユキノマム", age=None)
+    assert result == {"name": "キタノタカラ", "mare": "ユキノマム", "horse_id": "2024001003"}
+
+
+def test_search_cache_by_mare_not_found():
+    result = search_cache(SAMPLE_ENTRIES, name=None, mare="存在しない母", age=None)
+    assert result is None
+
+
+def test_search_cache_age_filter_match():
+    import datetime
+    current_year = datetime.date.today().year
+    age = current_year - 2023  # SAMPLE_ENTRIES の "サクラマム" 産駒は 2023 年生まれ
+    result = search_cache(SAMPLE_ENTRIES, name=None, mare="サクラマム", age=age)
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert all(e["horse_id"].startswith("2023") for e in result)
+
+
+def test_search_cache_age_filter_no_match():
+    import datetime
+    current_year = datetime.date.today().year
+    age = current_year - 2022  # 2022 年生まれを探すが SAMPLE_ENTRIES には存在しない
+    result = search_cache(SAMPLE_ENTRIES, name=None, mare="サクラマム", age=age)
+    assert result is None
+
+
+def test_search_cache_empty_entries():
+    result = search_cache([], name="アオイアサヒ", mare=None, age=None)
+    assert result is None
