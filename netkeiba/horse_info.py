@@ -1,4 +1,5 @@
 import re
+import sys
 
 from playwright.async_api import BrowserContext
 
@@ -43,7 +44,7 @@ async def fetch_horse_info(context: BrowserContext, horse_id: str) -> dict:
         # 性別: p.txt_01 の最初のトークン (例: "牝　栗毛" → "牝")
         sex = await _safe_text(page.locator("p.txt_01").first)
         if sex:
-            sex = sex.split()[0] if sex.split() else None
+            sex = sex.split()[0]
 
         # プロフィールテーブル
         prof: dict = {}
@@ -114,11 +115,13 @@ async def _parse_blood_table(page) -> tuple[str | None, str | None, str | None, 
 
         # 父
         sire_td = trs.nth(0).locator("td.b_ml").first
-        sire = (await sire_td.inner_text()).strip() or None
+        sire = (await sire_td.inner_text()).strip()
+        sire = sire if sire and sire != "-" else None
 
         # 母
         mare_td = trs.nth(2).locator("td.b_fml").first
-        mare = (await mare_td.inner_text()).strip() or None
+        mare = (await mare_td.inner_text()).strip()
+        mare = mare if mare and mare != "-" else None
 
         # 母ID
         mare_id = None
@@ -132,10 +135,12 @@ async def _parse_blood_table(page) -> tuple[str | None, str | None, str | None, 
         bms_td = trs.nth(2).locator("td").nth(1)
         bms = None
         if await bms_td.count() > 0:
-            bms = (await bms_td.inner_text()).strip() or None
+            bms = (await bms_td.inner_text()).strip()
+            bms = bms if bms and bms != "-" else None
 
         return sire, mare, mare_id, bms
-    except Exception:
+    except Exception as e:
+        print(f"[warn] 血統情報取得失敗: {e}", file=sys.stderr)
         return None, None, None, None
 
 
@@ -169,7 +174,8 @@ async def _parse_prof_table_links(page, heading_text: str) -> list[str] | None:
                     items.append(text)
             return items if items else None
         return None
-    except Exception:
+    except Exception as e:
+        print(f"[warn] {heading_text} の情報取得失敗: {e}", file=sys.stderr)
         return None
 
 
