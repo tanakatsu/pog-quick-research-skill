@@ -8,7 +8,7 @@ from playwright.async_api import BrowserContext
 from netkeiba.horse_info import fetch_horse_info
 from netkeiba.retry import with_retry
 
-_HORSE_ID_RE = re.compile(r"/horse/([0-9a-z]+)/?")
+_HORSE_ID_RE = re.compile(r"/horse/(?:ped/)?([0-9a-z]+)/?")
 
 
 def _is_excluded_year(horse_id: str, current_year: int) -> bool:
@@ -17,6 +17,7 @@ def _is_excluded_year(horse_id: str, current_year: int) -> bool:
 
 
 def _build_progeny_result(horse_id: str, info: dict) -> dict:
+    """fetch_horse_info() の返り値から産駒の成績フィールドを抽出して返す。"""
     return {
         "name": info.get("name"),
         "horse_id": horse_id,
