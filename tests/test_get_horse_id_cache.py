@@ -15,7 +15,7 @@ def test_load_cache_file_not_found(tmp_path):
 
 def test_load_cache_valid_file(tmp_path):
     data = [{"name": "テスト馬", "mare": "テスト母", "horse_id": "2023001001"}]
-    cache_file = tmp_path / "horse_list.json"
+    cache_file = tmp_path / "horse_id.json"
     cache_file.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
 
     result = load_cache(str(cache_file))
@@ -23,7 +23,7 @@ def test_load_cache_valid_file(tmp_path):
 
 
 def test_load_cache_corrupted_file(tmp_path, capsys):
-    cache_file = tmp_path / "horse_list.json"
+    cache_file = tmp_path / "horse_id.json"
     cache_file.write_text("not valid json", encoding="utf-8")
 
     result = load_cache(str(cache_file))
@@ -33,7 +33,7 @@ def test_load_cache_corrupted_file(tmp_path, capsys):
 
 
 def test_load_cache_non_list_json(tmp_path, capsys):
-    cache_file = tmp_path / "horse_list.json"
+    cache_file = tmp_path / "horse_id.json"
     cache_file.write_text('{"name": "テスト馬"}', encoding="utf-8")
 
     result = load_cache(str(cache_file))
@@ -47,7 +47,7 @@ from unittest.mock import patch
 
 def test_save_cache_writes_file(tmp_path):
     data = [{"name": "テスト馬", "mare": "テスト母", "horse_id": "2023001001"}]
-    cache_file = tmp_path / "horse_list.json"
+    cache_file = tmp_path / "horse_id.json"
 
     save_cache(str(cache_file), data)
 
@@ -57,7 +57,7 @@ def test_save_cache_writes_file(tmp_path):
 
 def test_save_cache_write_failure_warns(tmp_path, capsys):
     data = [{"name": "テスト馬", "mare": "テスト母", "horse_id": "2023001001"}]
-    cache_file = tmp_path / "horse_list.json"
+    cache_file = tmp_path / "horse_id.json"
 
     with patch("builtins.open", side_effect=IOError("disk full")):
         save_cache(str(cache_file), data)
@@ -68,7 +68,7 @@ def test_save_cache_write_failure_warns(tmp_path, capsys):
 
 def test_save_cache_creates_directory(tmp_path):
     data = [{"name": "テスト馬", "mare": "テスト母", "horse_id": "2023001001"}]
-    cache_file = tmp_path / "subdir" / "horse_list.json"  # subdir doesn't exist yet
+    cache_file = tmp_path / "subdir" / "horse_id.json"  # subdir doesn't exist yet
 
     save_cache(str(cache_file), data)
 

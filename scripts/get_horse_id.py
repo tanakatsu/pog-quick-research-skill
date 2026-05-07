@@ -116,8 +116,8 @@ def cli() -> None:
     )
     parser.add_argument(
         "--cache",
-        default="cache/horse_list.json",
-        help="キャッシュファイルのパス（デフォルト: cache/horse_list.json）",
+        default="cache/horse_id.json",
+        help="キャッシュファイルのパス（デフォルト: cache/horse_id.json）",
     )
     args = parser.parse_args()
     sys.exit(asyncio.run(main(args)))
