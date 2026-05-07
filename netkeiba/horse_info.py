@@ -6,6 +6,14 @@ from playwright.async_api import BrowserContext
 from netkeiba.retry import with_retry
 
 _HORSE_ID_RE = re.compile(r"/horse/(?:ped/)?([0-9a-z]+)/?")
+_SEX_RE = re.compile(r"(セン|牡|牝)")
+
+def _parse_sex(text: str | None) -> str | None:
+    if not text:
+        return None
+    m = _SEX_RE.search(text)
+    return m.group(1) if m else None
+
 
 _PROF_LABEL_MAP = {
     "生年月日": "birth_date",
@@ -41,10 +49,8 @@ async def fetch_horse_info(context: BrowserContext, horse_id: str) -> dict:
         # 馬名: 2番目の h1 (0番目は netkeiba ロゴ)
         name = (await page.locator("h1").nth(1).inner_text()).strip()
 
-        # 性別: p.txt_01 の最初のトークン (例: "牝　栗毛" → "牝")
-        sex = await _safe_text(page.locator("p.txt_01").first)
-        if sex:
-            sex = sex.split()[0]
+        # 性別: p.txt_01 から牡/牝/センを抽出 (例: "現役　牡2歳　黒鹿毛" → "牡")
+        sex = _parse_sex(await _safe_text(page.locator("p.txt_01").first))
 
         # プロフィールテーブル
         prof: dict = {}
