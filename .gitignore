@@ -6,5 +6,6 @@ __pycache__/
 .playwright-cli/
 .claude
 docs/
-cache/*.txt
+cache/*.json
+*.txt
 .worktrees/
