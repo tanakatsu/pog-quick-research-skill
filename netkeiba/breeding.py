@@ -8,7 +8,7 @@ from playwright.async_api import BrowserContext
 from netkeiba.horse_info import fetch_horse_info
 from netkeiba.retry import with_retry
 
-_HORSE_ID_RE = re.compile(r"/horse/(?:ped/)?([0-9a-z]+)/?")
+_HORSE_ID_RE = re.compile(r"/horse/(?:ped/)?(\d[0-9a-z]+)/?")
 
 
 def _is_excluded_year(horse_id: str, current_year: int) -> bool:
@@ -57,21 +57,26 @@ async def fetch_breeding_performance(
         mare_name = (await page.locator("h1").nth(1).inner_text()).strip()
 
         current_year = date.today().year
-        links = page.locator("table.race_table_01 a[href*='/horse/']")
-        count = await links.count()
         progeny_ids: list[str] = []
         seen: set[str] = set()
-        for i in range(count):
-            href = await links.nth(i).get_attribute("href") or ""
-            m = _HORSE_ID_RE.search(href)
-            if not m:
-                continue
-            horse_id = m.group(1)
-            if horse_id in seen:
-                continue
-            seen.add(horse_id)
-            if not _is_excluded_year(horse_id, current_year):
-                progeny_ids.append(horse_id)
+
+        try:
+            await page.locator("table.race_table_01").wait_for(timeout=15000)
+            links = page.locator("table.race_table_01 a[href*='/horse/']")
+            count = await links.count()
+            for i in range(count):
+                href = await links.nth(i).get_attribute("href") or ""
+                m = _HORSE_ID_RE.search(href)
+                if not m:
+                    continue
+                horse_id = m.group(1)
+                if horse_id in seen:
+                    continue
+                seen.add(horse_id)
+                if not _is_excluded_year(horse_id, current_year):
+                    progeny_ids.append(horse_id)
+        except Exception as e:
+            print(f"[warn] 産駒リスト取得失敗: {e}", file=sys.stderr)
     finally:
         await page.close()
 
