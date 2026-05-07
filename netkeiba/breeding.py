@@ -8,6 +8,7 @@ from playwright.async_api import BrowserContext
 from netkeiba.horse_info import fetch_horse_info
 from netkeiba.retry import with_retry
 
+# Leading \d prevents matching /horse/mare/... sub-path hrefs as horse IDs.
 _HORSE_ID_RE = re.compile(r"/horse/(?:ped/)?(\d[0-9a-z]+)/?")
 
 
