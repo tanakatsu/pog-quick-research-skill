@@ -1,0 +1,30 @@
+{
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run ruff format --check . 2>&1; uv run ruff check . 2>&1 || true",
+            "statusMessage": "Running ruff..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run pytest 2>&1 || true",
+            "statusMessage": "Running pytest..."
+          }
+        ]
+      }
+    ]
+  }
+}
