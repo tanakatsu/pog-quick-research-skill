@@ -48,4 +48,5 @@ description: POGの馬レポートを作成する
 - POG向き調教師: [references/trainer.md](references/trainer.md)
 - POG向き馬主: [references/owner.md](references/owner.md)
 - POG向き馬体: [references/body.md](references/body.md)
+- 生年月日によるPOG診断ポイント: [references/birthdate.md](references/birthdate.md)
 - 関係者コメントの読み取り方: [references/comment.md](references/comment.md)
